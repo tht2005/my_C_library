@@ -3,3 +3,4 @@ main.c
 main
 Makefile
 *.swp
+*.out
