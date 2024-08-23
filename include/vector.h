@@ -75,7 +75,7 @@ typedef struct vector_metadata_t {
 }
 
 #define vector_grow(vec, size) {										\
-	size_t _vect_size = ((size) + 1) * sizeof(*vec) + sizeof(vector_metadata_t);					\
+	size_t _vect_size = ((size) + 1) * sizeof(*vec) + sizeof(vector_metadata_t);				\
 	if(vec) {												\
 		void *_p1__ = vec_to_base(vec);									\
 		void *_p2__ = vector_clib_realloc(_p1__, _vect_size);						\
