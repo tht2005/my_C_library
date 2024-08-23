@@ -112,12 +112,15 @@ typedef struct vector_metadata_t {
 	vector_set_size(vec, size);										\
 }
 
+#define vector_clear(vec) \
+	{ vector_set_size(vec, 0); }
+
 #define vector_free(vec) {											\
 	if(vec) {												\
 		vector_elem_destructor_t _elem_dest_func = vector_elem_destructor(vec);				\
 		if(_elem_dest_func) {										\
 			for(size_t i = 0; i < vector_size(vec); ++i) {						\
-				_elem_dest_func((vec)[i]);							\
+				_elem_dest_func(&( (vec)[i] ));							\
 			}											\
 		}												\
 		vector_clib_free(vec_to_base(vec));								\
@@ -125,8 +128,28 @@ typedef struct vector_metadata_t {
 }
 
 #define vector_init(vec, size, elem_destructor_fn) {								\
-	if(!vec) {												\
+	if(!(vec)) {												\
 		vector_grow(vec, size);										\
+		vector_set_elem_destructor(vec, elem_destructor_fn);						\
+	}													\
+}
+
+#define vector_init_memset(vec, size, value, elem_destructor_fn) {						\
+	if(!(vec)) {												\
+		vector_grow(vec, size);										\
+		vector_set_size(vec, size);									\
+		memset(vec, value, (size) * sizeof(*vec));							\
+		vector_set_elem_destructor(vec, elem_destructor_fn);						\
+	}													\
+}
+
+#define vector_init_fill(vec, size, value, elem_destructor_fn) {						\
+	if(!(vec)) {												\
+		vector_grow(vec, size);										\
+		vector_set_size(vec, size);									\
+		for(size_t i = 0; i < size; ++i) {								\
+			(vec)[i] = (value);									\
+		}												\
 		vector_set_elem_destructor(vec, elem_destructor_fn);						\
 	}													\
 }
@@ -147,5 +170,14 @@ typedef struct vector_metadata_t {
 		vector_set_size(vec, _vect_size - 1);								\
 	}													\
 }
+
+void *__vector_lib_copy(void *ptr, size_t size) {
+	void *cop = malloc(size);
+	memcpy(cop, ptr, size);
+	return cop;
+}
+
+#define vector_copy(vec) \
+	( base_to_vec(__vector_lib_copy(vec_to_base(vec), sizeof_vector(vec))) )
 
 #endif
