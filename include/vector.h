@@ -1,7 +1,6 @@
 #ifndef VECTOR_H_kei9s93k
 #define VECTOR_H_kei9s93k
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,6 +17,7 @@
 #define vector_clib_free free
 #endif
 #ifndef vector_clib_assert
+#include <assert.h>
 #define vector_clib_assert assert
 #endif
 
@@ -33,7 +33,7 @@ typedef struct vector_metadata_t {
 #define vector(T) vector_type(T)
 #define vector_iterator(T) vector_type(T)
 
-#ifdef LINEAR_GROW
+#ifdef VECTOR_LINEAR_GROW
 #define vector_compute_next_grow(size) \
 	((size) + 1)
 #else
@@ -51,6 +51,14 @@ typedef struct vector_metadata_t {
 	(vec)
 #define vector_end(vec) \
 	( (vec) ? ((vec) + vector_size(vec)) : NULL )
+
+#define vector_front(vec) \
+	(*(vec))
+#define vector_back(vec) \
+	( vector_end(vec)[-1] )
+
+#define sizeof_vector(vec) \
+	( (vec) ? ( sizeof(vector_metadata_t) + vector_capacity(vec) * sizeof(*(vec)) ) : 0 )
 
 #define vector_size(vec) \
 	( (vec) ? ( vec_to_base(vec)->size ) : (size_t)0 )
@@ -75,7 +83,7 @@ typedef struct vector_metadata_t {
 }
 
 #define vector_grow(vec, size) {										\
-	size_t _vect_size = ((size) + 1) * sizeof(*vec) + sizeof(vector_metadata_t);				\
+	size_t _vect_size = (size) * sizeof(*vec) + sizeof(vector_metadata_t);					\
 	if(vec) {												\
 		void *_p1__ = vec_to_base(vec);									\
 		void *_p2__ = vector_clib_realloc(_p1__, _vect_size);						\
@@ -97,6 +105,11 @@ typedef struct vector_metadata_t {
 	if(_vect_cap < (size)) {										\
 		vector_grow(vec, size);										\
 	}													\
+}
+
+#define vector_resize(vec, size) {										\
+	vector_reserve(vec, size);										\
+	vector_set_size(vec, size);										\
 }
 
 #define vector_free(vec) {											\
