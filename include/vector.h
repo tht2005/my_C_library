@@ -140,5 +140,12 @@ typedef struct vector_metadata_t {
 	(vec)[_vect_size] = (value);										\
 	vector_set_size(vec, _vect_size + 1);									\
 }
+#define vector_pop_back(vec) {											\
+	if(vec) {												\
+		size_t _vect_size = vector_size(vec);								\
+		vector_clib_assert(_vect_size);									\
+		vector_set_size(vec, _vect_size - 1);								\
+	}													\
+}
 
 #endif
